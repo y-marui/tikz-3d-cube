@@ -1,0 +1,327 @@
+\makeatletter
+\pgfkeys{/pgf/.cd,
+	object size/.initial=2cm,
+	object ratio y/.initial=1,
+	object ratio z/.initial=1,
+	object xy/.initial=0,
+	object yz/.initial=0,
+	object zx/.initial=0,
+	object mx/.initial=0,
+	object my/.initial=0,
+	object mz/.initial=0
+}
+\pgfdeclareshape{cube3d}
+{
+	\newlength{\size@x}
+	\newlength{\size@y}
+	\newlength{\size@z}
+	\newlength{\vx@x}
+	\newlength{\vx@y}
+	\newlength{\vy@x}
+	\newlength{\vy@y}
+	\newlength{\vz@x}
+	\newlength{\vz@y}
+
+	\savedmacro\xy{\edef\xy{\pgfkeysvalueof{/pgf/object xy}}}
+	\savedmacro\yz{\edef\yz{\pgfkeysvalueof{/pgf/object yz}}}
+	\savedmacro\zx{\edef\zx{\pgfkeysvalueof{/pgf/object zx}}}
+
+	\savedmacro\mx{\edef\mx{\pgfkeysvalueof{/pgf/object mx}/2}}
+	\savedmacro\my{\edef\my{\pgfkeysvalueof{/pgf/object my}/2}}
+	\savedmacro\mz{\edef\mz{\pgfkeysvalueof{/pgf/object mz}/2}}
+
+	\savedmacro\size@x{\edef\size@x{\pgfkeysvalueof{/pgf/object size}/2}}
+	\savedmacro\size@y{\edef\size@y{\pgfkeysvalueof{/pgf/object ratio y}*\size@x}}
+	\savedmacro\size@z{\edef\size@z{\pgfkeysvalueof{/pgf/object ratio z}*\size@x}}
+
+	\savedmacro\vx@x{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vx@x}{(cos(\xy)*cos(\zx)+sin(\xy)*sin(\yz)*sin(\zx))*\size@x}
+		\else
+			\pgfmathsetmacro{\vx@x}{-(cos(\xy)*cos(\zx)+sin(\xy)*sin(\yz)*sin(\zx))*\size@x}
+		\fi}
+	\savedmacro\vx@y{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vx@y}{cos(\yz)*sin(\xy)*\size@x}
+		\else
+			\pgfmathsetmacro{\vx@y}{-cos(\yz)*sin(\xy)*\size@x}
+		\fi}
+	\savedmacro\vy@x{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vy@x}{(cos(\xy)*sin(\yz)*sin(\zx)-cos(\zx)*sin(\xy))*\size@y}
+		\else
+			\pgfmathsetmacro{\vy@x}{-(cos(\xy)*sin(\yz)*sin(\zx)-cos(\zx)*sin(\xy))*\size@y}
+		\fi}
+	\savedmacro\vy@y{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vy@y}{cos(\xy)*cos(\yz)*\size@y}
+		\else
+			\pgfmathsetmacro{\vy@y}{-cos(\xy)*cos(\yz)*\size@y}
+		\fi}
+	\savedmacro\vz@x{
+		\pgfmathparse{cos(\yz)*cos(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vz@x}{cos(\yz)*sin(\zx)*\size@z}
+		\else
+			\pgfmathsetmacro{\vz@x}{-cos(\yz)*sin(\zx)*\size@z}
+		\fi}
+	\savedmacro\vz@y{
+		\pgfmathparse{cos(\yz)*cos(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vz@y}{-sin(\yz)*\size@z}
+		\else
+			\pgfmathsetmacro{\vz@y}{sin(\yz)*\size@z}
+		\fi}
+
+	\savedanchor{\center}{\pgfpointorigin}
+	\anchor{center}{\center}
+
+	\savedanchor{\north}{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{0}{\vy@y}
+		\else
+			\pgfpoint{0}{-\vy@y+\vz@y}
+		\fi}
+	\anchor{north}{\north}
+
+	\savedanchor{\south}{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{0}{-\vy@y+\vz@y}
+		\else
+			\pgfpoint{0}{\vy@y}
+		\fi}
+	\anchor{south}{\south}
+
+	\savedanchor{\west}{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{-\vx@x+\vz@x}{0}
+		\else
+			\pgfpoint{\vx@x}{0}
+		\fi}
+	\anchor{west}{\west}
+
+	\savedanchor{\east}{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{\vx@x}{0}
+		\else
+			\pgfpoint{-\vx@x+\vz@x}{0}
+		\fi}
+	\anchor{east}{\east}
+
+	\inheritanchorborder[from=rectangle]
+	%	\inheritsavedanchors[from=rectangle]
+
+	\backgroundpath{
+		\pgfpathmoveto{\pgfpoint{\vx@x+\vy@x+\vz@x}{\vx@y+\vy@y+\vz@y}}
+		\pgfpathlineto{\pgfpoint{-\vx@x+\vy@x+\vz@x}{-\vx@y+\vy@y+\vz@y}}
+		\pgfpathlineto{\pgfpoint{-\vx@x-\vy@x+\vz@x}{-\vx@y-\vy@y+\vz@y}}
+		\pgfpathlineto{\pgfpoint{\vx@x-\vy@x+\vz@x}{\vx@y-\vy@y+\vz@y}}
+		\pgfpathclose
+		\pgfpathmoveto{\pgfpoint{\vx@x+\vy@x+\vz@x}{\vx@y+\vy@y+\vz@y}}
+		\pgfpathlineto{\pgfpoint{\vx@x+\vy@x-\vz@x}{\vx@y+\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{-\vx@x+\vy@x-\vz@x}{-\vx@y+\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{-\vx@x+\vy@x+\vz@x}{-\vx@y+\vy@y+\vz@y}}
+		\pgfpathmoveto{\pgfpoint{\vx@x+\vy@x-\vz@x}{\vx@y+\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{\vx@x-\vy@x-\vz@x}{\vx@y-\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{\vx@x-\vy@x+\vz@x}{\vx@y-\vy@y+\vz@y}}
+		\pgfpathlineto{\pgfpoint{\vx@x+\vy@x+\vz@x}{\vx@y+\vy@y+\vz@y}}
+		\pgfusepath{stroke}
+	}
+}
+
+\pgfdeclareshape{cube3d bottom}
+{
+	\savedmacro\xy{\edef\xy{\pgfkeysvalueof{/pgf/object xy}}}
+	\savedmacro\yz{\edef\yz{\pgfkeysvalueof{/pgf/object yz}}}
+	\savedmacro\zx{\edef\zx{\pgfkeysvalueof{/pgf/object zx}}}
+
+	\savedmacro\mx{\edef\mx{\pgfkeysvalueof{/pgf/object mx}/2}}
+	\savedmacro\my{\edef\my{\pgfkeysvalueof{/pgf/object my}/2}}
+	\savedmacro\mz{\edef\mz{\pgfkeysvalueof{/pgf/object mz}/2}}
+
+	\savedmacro\size@x{\edef\size@x{\pgfkeysvalueof{/pgf/object size}/2}}
+	\savedmacro\size@y{\edef\size@y{\pgfkeysvalueof{/pgf/object ratio y}*\size@x}}
+	\savedmacro\size@z{\edef\size@z{\pgfkeysvalueof{/pgf/object ratio z}*\size@x}}
+
+	\savedmacro\vx@x{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vx@x}{(cos(\xy)*cos(\zx)+sin(\xy)*sin(\yz)*sin(\zx))*\size@x}
+		\else
+			\pgfmathsetmacro{\vx@x}{-(cos(\xy)*cos(\zx)+sin(\xy)*sin(\yz)*sin(\zx))*\size@x}
+		\fi}
+	\savedmacro\vx@y{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vx@y}{cos(\yz)*sin(\xy)*\size@x}
+		\else
+			\pgfmathsetmacro{\vx@y}{-cos(\yz)*sin(\xy)*\size@x}
+		\fi}
+	\savedmacro\vy@x{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vy@x}{(cos(\xy)*sin(\yz)*sin(\zx)-cos(\zx)*sin(\xy))*\size@y}
+		\else
+			\pgfmathsetmacro{\vy@x}{-(cos(\xy)*sin(\yz)*sin(\zx)-cos(\zx)*sin(\xy))*\size@y}
+		\fi}
+	\savedmacro\vy@y{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vy@y}{cos(\xy)*cos(\yz)*\size@y}
+		\else
+			\pgfmathsetmacro{\vy@y}{-cos(\xy)*cos(\yz)*\size@y}
+		\fi}
+	\savedmacro\vz@x{
+		\pgfmathparse{cos(\yz)*cos(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vz@x}{cos(\yz)*sin(\zx)*\size@z}
+		\else
+			\pgfmathsetmacro{\vz@x}{-cos(\yz)*sin(\zx)*\size@z}
+		\fi}
+	\savedmacro\vz@y{
+		\pgfmathparse{cos(\yz)*cos(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vz@y}{-sin(\yz)*\size@z}
+		\else
+			\pgfmathsetmacro{\vz@y}{sin(\yz)*\size@z}
+		\fi}
+
+	\savedanchor{\center}{\pgfpointorigin}
+	\anchor{center}{\center}
+
+	\savedanchor{\north}{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{0}{\vy@y}
+		\else
+			\pgfpoint{0}{-\vy@y+\vz@y}
+		\fi}
+	\anchor{north}{\north}
+
+	\savedanchor{\south}{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{0}{-\vy@y+\vz@y}
+		\else
+			\pgfpoint{0}{\vy@y}
+		\fi}
+	\anchor{south}{\south}
+
+	\savedanchor{\west}{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{-\vx@x+\vz@x}{0}
+		\else
+			\pgfpoint{\vx@x}{0}
+		\fi}
+	\anchor{west}{\west}
+
+	\savedanchor{\east}{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfpoint{\vx@x}{0}
+		\else
+			\pgfpoint{-\vx@x+\vz@x}{0}
+		\fi}
+	\anchor{east}{\east}
+
+	\inheritanchorborder[from=rectangle]
+	%	\inheritsavedanchors[from=rectangle]
+
+	\backgroundpath{
+		\pgfsetdash{{1pt}{1pt}}{0pt}
+		\pgfpathmoveto{\pgfpoint{-\vx@x-\vy@x-\vz@x}{-\vx@y-\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{\vx@x-\vy@x-\vz@x}{\vx@y-\vy@y-\vz@y}}
+		\pgfpathmoveto{\pgfpoint{-\vx@x-\vy@x-\vz@x}{-\vx@y-\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{-\vx@x+\vy@x-\vz@x}{-\vx@y+\vy@y-\vz@y}}
+		\pgfpathmoveto{\pgfpoint{-\vx@x-\vy@x-\vz@x}{-\vx@y-\vy@y-\vz@y}}
+		\pgfpathlineto{\pgfpoint{-\vx@x-\vy@x+\vz@x}{-\vx@y-\vy@y+\vz@y}}
+		\pgfusepath{stroke}
+	}
+}
+
+\pgfdeclareshape{arrow3d}
+{
+	\savedmacro\xy{\edef\xy{\pgfkeysvalueof{/pgf/object xy}}}
+	\savedmacro\yz{\edef\yz{\pgfkeysvalueof{/pgf/object yz}}}
+	\savedmacro\zx{\edef\zx{\pgfkeysvalueof{/pgf/object zx}}}
+
+	\savedmacro\mx{\edef\mx{\pgfkeysvalueof{/pgf/object mx}}}
+	\savedmacro\my{\edef\my{\pgfkeysvalueof{/pgf/object my}}}
+	\savedmacro\mz{\edef\mz{\pgfkeysvalueof{/pgf/object mz}}}
+
+	\savedmacro\size@x{\edef\size@x{\pgfkeysvalueof{/pgf/object size}/2}}
+	\savedmacro\size@y{\edef\size@y{\pgfkeysvalueof{/pgf/object ratio y}*\size@x}}
+	\savedmacro\size@z{\edef\size@z{\pgfkeysvalueof{/pgf/object ratio z}*\size@x}}
+
+	\savedmacro\vx@x{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vx@x}{(cos(\xy)*cos(\zx)+sin(\xy)*sin(\yz)*sin(\zx))*\size@x}
+		\else
+			\pgfmathsetmacro{\vx@x}{-(cos(\xy)*cos(\zx)+sin(\xy)*sin(\yz)*sin(\zx))*\size@x}
+		\fi}
+	\savedmacro\vx@y{
+		\pgfmathparse{cos(\zx)*sin(\xy)*sin(\yz)-cos(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vx@y}{cos(\yz)*sin(\xy)*\size@x}
+		\else
+			\pgfmathsetmacro{\vx@y}{-cos(\yz)*sin(\xy)*\size@x}
+		\fi}
+	\savedmacro\vy@x{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vy@x}{(cos(\xy)*sin(\yz)*sin(\zx)-cos(\zx)*sin(\xy))*\size@y}
+		\else
+			\pgfmathsetmacro{\vy@x}{-(cos(\xy)*sin(\yz)*sin(\zx)-cos(\zx)*sin(\xy))*\size@y}
+		\fi}
+	\savedmacro\vy@y{
+		\pgfmathparse{cos(\xy)*cos(\zx)*sin(\yz)+sin(\xy)*sin(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vy@y}{cos(\xy)*cos(\yz)*\size@y}
+		\else
+			\pgfmathsetmacro{\vy@y}{-cos(\xy)*cos(\yz)*\size@y}
+		\fi}
+	\savedmacro\vz@x{
+		\pgfmathparse{cos(\yz)*cos(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vz@x}{cos(\yz)*sin(\zx)*\size@z}
+		\else
+			\pgfmathsetmacro{\vz@x}{-cos(\yz)*sin(\zx)*\size@z}
+		\fi}
+	\savedmacro\vz@y{
+		\pgfmathparse{cos(\yz)*cos(\zx)>0}
+		\ifnum\pgfmathresult=1
+			\pgfmathsetmacro{\vz@y}{-sin(\yz)*\size@z}
+		\else
+			\pgfmathsetmacro{\vz@y}{sin(\yz)*\size@z}
+		\fi}
+
+	\savedanchor{\center}{\pgfpointorigin}
+	\anchor{center}{\center}
+
+	\savedanchor{\north}{\pgfpoint{\mx*\vx@x+\my*\vy@x+\mz*\vz@x}{\mx*\vx@y+\my*\vy@y+\mz*\vz@y}}
+	\anchor{north}{\north}
+
+	\savedanchor{\south}{\pgfpoint{-\mx*\vx@x-\my*\vy@x-\mz*\vz@x}{-\mx*\vx@y-\my*\vy@y-\mz*\vz@y}}
+	\anchor{south}{\south}
+
+	\inheritanchorborder[from=rectangle]
+	\inheritsavedanchors[from=rectangle]
+
+	\backgroundpath{
+		\pgfsetarrowsend{to}
+		\pgfusepath{stroke}
+		\pgfpathmoveto{\south}
+		\pgfpathlineto{\north}
+	}
+}
+\makeatother
