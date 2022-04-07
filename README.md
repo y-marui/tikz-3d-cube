@@ -1,2 +1,2 @@
-# tikz-3d-cube
-tikz library to draw 3d cube
+# tikz 3d cube
+A tikz library to draw 3d cube.
